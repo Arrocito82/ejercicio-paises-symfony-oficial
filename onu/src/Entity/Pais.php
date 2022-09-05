@@ -19,6 +19,18 @@ class Pais
     #[ORM\Column(length: 25)]
     private ?string $nombre = null;
 
+    #[ORM\Column(length: 25, nullable: true)]
+    private ?string $capital = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $poblacion = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $moneda = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $idioma = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -44,6 +56,54 @@ class Pais
     public function setNombre(string $nombre): self
     {
         $this->nombre = $nombre;
+
+        return $this;
+    }
+
+    public function getCapital(): ?string
+    {
+        return $this->capital;
+    }
+
+    public function setCapital(?string $capital): self
+    {
+        $this->capital = $capital;
+
+        return $this;
+    }
+
+    public function getPoblacion(): ?int
+    {
+        return $this->poblacion;
+    }
+
+    public function setPoblacion(?int $poblacion): self
+    {
+        $this->poblacion = $poblacion;
+
+        return $this;
+    }
+
+    public function getMoneda(): ?string
+    {
+        return $this->moneda;
+    }
+
+    public function setMoneda(?string $moneda): self
+    {
+        $this->moneda = $moneda;
+
+        return $this;
+    }
+
+    public function getIdioma(): ?string
+    {
+        return $this->idioma;
+    }
+
+    public function setIdioma(?string $idioma): self
+    {
+        $this->idioma = $idioma;
 
         return $this;
     }
