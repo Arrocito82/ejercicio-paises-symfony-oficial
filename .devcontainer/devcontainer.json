@@ -23,7 +23,8 @@
 		"xdebug.php-debug",
 		"bmewburn.vscode-intelephense-client",
 		"mrmlnc.vscode-apache",
-		"rangav.vscode-thunder-client"
+		"rangav.vscode-thunder-client",
+		"donjayamanne.githistory"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
