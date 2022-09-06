@@ -20,14 +20,26 @@ class PaisController extends AbstractController
     }
 
     // la ruta en el browser es /paises/nombre, con los parametros opcionales nombre pais
-    #[Route('/paises/nombre/{nombrePais}', name: 'filtroNombrePais', defaults: ['nombrePais'=>null])]
-    public function filtrarNombrePais( $nombrePais): JsonResponse
-    {
-        ($nombrePais==null)?$nombrePais="":null;
-        // retorna un archivo json
-        return $this->json([
-            'nombre_pais' => $nombrePais,
-        ]);
+    #[Route('/pais/nombre/{nombrePais}', name: 'filtroNombrePais', defaults: ['nombrePais'=>null])]
+    public function filtrarNombrePais($nombrePais, ManagerRegistry $doctrine): JsonResponse
+    { 
+        $pais = $doctrine->getRepository(Pais::class)->findOneBy(['nombre' => $nombrePais]);
+
+        if (!$pais) {
+            throw $this->createNotFoundException(
+                'No hay datos'
+            );
+        }
+        
+        $result[] = array(
+            'nombre' => $pais->getNombre(),
+            'capital' => $pais->getCapital(),
+            'poblacion' => $pais->getPoblacion(),
+            'moneda' => $pais->getMoneda(),
+            'idioma' => $pais->getIdioma(),
+        );
+
+        return $this->json(['pais'=>$result]);
     }
 
     // notese que el nombre del parametro codigoPais es el mismo de la variable en la funcion detallePais, es decir $codigoPais
