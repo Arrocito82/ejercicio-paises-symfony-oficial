@@ -17,9 +17,4 @@ class FronteraController extends AbstractController
         ]);
     }
 
-    public function show(ManagerRegistry $doctrine, int $codigoPais): Response{
-        $pais = $doctrine->getRepository(Pais::class)->find($codigoPais);
-        $categoryName = $product->getCategory()->getName();
-    }
-
 }

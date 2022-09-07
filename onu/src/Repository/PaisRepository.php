@@ -38,29 +38,59 @@ class PaisRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+  
+   /**
+    * @return Pais[] retorna todos los paises ordenados alfabeticamente
+    */
+   public function findAll(): array
+   {
+        
+       return $this->createQueryBuilder('pais')
+           ->orderBy('pais.nombre', 'ASC')
+        //    ->setMaxResults(10)
+           ->getQuery()
+           ->getResult()
+       ;
+   }
 
-//    /**
-//     * @return Pais[] Returns an array of Pais objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+   /**
+    * @return Pais[] retorna un array con los paises que concuerdan con el nombre
+    */
+   public function filtrarNombre($nombre): array
+   {
+       return $this->createQueryBuilder('pais')
+           ->andWhere('lower(pais.nombre) like lower(:nombre)')
+           ->setParameter('nombre', '%'.$nombre.'%')
+           ->getQuery()
+           ->getArrayResult()
+       ;
+   }
 
-//    public function findOneBySomeField($value): ?Pais
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+   public function getDetallePais($id)
+   {
+        $pais=$this->createQueryBuilder('p')
+        ->andWhere('p.id = :id')
+        ->setParameter('id', $id)
+        ->getQuery()
+        ->getArrayResult();
+        return $pais[0];
+   }
+
+
+   /**
+    * @return Pais[] retorna un array de paises que pertenecen a la region
+    */
+   public function filtrarPaisesPorRegion(int $codigoRegion): array
+   {
+       $entityManager = $this->getEntityManager();
+
+       $query = $entityManager->createQuery(
+           'SELECT p
+            FROM App\Entity\Pais p
+            JOIN p.region r
+            WHERE r.codigo=:codigoRegion')
+            ->setParameter('codigoRegion',$codigoRegion);
+
+       return $query->getArrayResult();
+   }
 }

@@ -31,6 +31,10 @@ class Pais
     #[ORM\Column(length: 20, nullable: true)]
     private ?string $idioma = null;
 
+    #[ORM\ManyToOne(inversedBy: 'pais')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Region $region = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -107,4 +111,17 @@ class Pais
 
         return $this;
     }
+
+    public function getRegion(): ?Region
+    {
+        return $this->region;
+    }
+
+    public function setRegion(?Region $region): self
+    {
+        $this->region = $region;
+
+        return $this;
+    }
+    
 }

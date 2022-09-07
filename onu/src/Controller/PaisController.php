@@ -1,84 +1,23 @@
 <?php
 
 namespace App\Controller;
-use App\Entity\Pais;
+use App\Entity\{Pais,Region};
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\{JsonResponse,Response};
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Serializer\SerializerInterface;
+
 class PaisController extends AbstractController
 {
+    
     // la ruta en el browser es /paises/region/, con los parametros opcionales region 
-    #[Route('/paises/region/{region}', name: 'filtroRegion', defaults: ['region'=>null])]
-    public function filtrarRegionPais($region): JsonResponse
+    #[Route('/pais/region/{codigoRegion}', name: 'filtroRegion', defaults: ['codigoRegion'=>null])]
+    public function filtrarRegionPais($codigoRegion, ManagerRegistry $doctrine,SerializerInterface $serializer): Response
     {
-        if ($region==null) $region="";
-        // retorna un archivo json
-        return $this->json([
-            'region' => $region,
-        ]);
-    }
-
-    // la ruta en el browser es /paises/nombre, con los parametros opcionales nombre pais
-    #[Route('/pais/nombre/{nombrePais}', name: 'filtroNombrePais', defaults: ['nombrePais'=>null])]
-    public function filtrarNombrePais($nombrePais, ManagerRegistry $doctrine): JsonResponse
-    { 
-        $pais = $doctrine->getRepository(Pais::class)->findOneBy(['nombre' => $nombrePais]);
-
-        if (!$pais) {
-            throw $this->createNotFoundException(
-                'No hay datos'
-            );
-        }
         
-        $result[] = array(
-            'nombre' => $pais->getNombre(),
-            'capital' => $pais->getCapital(),
-            'poblacion' => $pais->getPoblacion(),
-            'moneda' => $pais->getMoneda(),
-            'idioma' => $pais->getIdioma(),
-        );
-
-        return $this->json(['pais'=>$result]);
-    }
-
-    // notese que el nombre del parametro codigoPais es el mismo de la variable en la funcion detallePais, es decir $codigoPais
-    #[Route('/pais/{codigoPais}', name: 'detallePais', methods:['GET'])]
-    public function detallePais(ManagerRegistry $doctrine,$codigoPais): JsonResponse
-    {
-        $pais = $doctrine->getRepository(Pais::class)->findOneBy(['codigo' => $codigoPais]);
-
-        if (!$pais) {
-            throw $this->createNotFoundException(
-                'No hay datos'
-            );
-        }
+        $paises=$doctrine->getRepository(Pais::class)->filtrarPaisesPorRegion($codigoRegion);
         
-        $result[] = array(
-            'nombre' => $pais->getNombre(),
-            'capital' => $pais->getCapital(),
-            'poblacion' => $pais->getPoblacion(),
-            'moneda' => $pais->getMoneda(),
-            'idioma' => $pais->getIdioma(),
-        );
-
-        // return new JsonResponse(['paises'=>$result]);
-        return $this->json(['pais'=>$result]);
-    }
-
-    // #[Route('/paises/', name: 'listaPaises', methods:['GET'])]
-    // public function lista(): JsonResponse
-    // {
-        
-    //     return $this->json([
-    //         'message' => 'Welcome to your new controller! ',
-    //         'path' => 'src/Controller/PaisController.php',
-    //     ]);
-    // }
-    #[Route('/paises/', name: 'listaPaises')]
-    public function listaPaises(ManagerRegistry $doctrine): JsonResponse
-    {
-        $paises = $doctrine->getRepository(Pais::class)->findAll();
 
         if (!$paises) {
             throw $this->createNotFoundException(
@@ -86,18 +25,54 @@ class PaisController extends AbstractController
             );
         }
         
-        $result = array();
+        $jsonContent = $serializer->serialize(array('data'=>$paises), 'json');
+        return new Response($jsonContent);
+    }
 
-        foreach($paises as $pais) {
-            $result[] = array(
-                'nombre' => $pais->getNombre(),
-                'capital' => $pais->getCapital(),
-                'poblacion' => $pais->getPoblacion(),
-                'moneda' => $pais->getMoneda(),
-                'idioma' => $pais->getIdioma(),
+    // la ruta en el browser es /paises/nombre, con los parametros opcionales nombre pais
+    #[Route('/pais/nombre/{nombrePais}', name: 'filtroNombrePais', defaults: ['nombrePais'=>null])]
+    public function filtrarNombrePais($nombrePais, ManagerRegistry $doctrine,SerializerInterface $serializer): Response
+    { 
+        $paises = $doctrine->getRepository(Pais::class)->filtrarNombre($nombrePais);
+
+        if (!$paises) {
+            throw $this->createNotFoundException(
+                'No hay datos'
             );
         }
+        
+        $jsonContent = $serializer->serialize(array('data'=>$paises), 'json');
+        return new Response($jsonContent);
+    }
+    
+    // notese que el nombre del parametro codigoPais es el mismo de la variable en la funcion detallePais, es decir $codigoPais
+    #[Route('/pais/{idPais}', name: 'detallePais', methods:['GET'])]
+    public function detallePais(ManagerRegistry $doctrine,SerializerInterface $serializer, $idPais): Response
+    {
+        $pais = $doctrine->getRepository(Pais::class)->getDetallePais( $idPais);
+        
+        if (!$pais) {
+            throw $this->createNotFoundException(
+                'No hay datos'
+            );
+        }
+        
+        $jsonContent = $serializer->serialize(array('data'=>$pais), 'json');
+        return new Response($jsonContent);
+    }
 
-        return new JsonResponse(['paises'=>$result]);
+    #[Route('/paises/', name: 'listaPaises')]
+    public function listaPaises(ManagerRegistry $doctrine,SerializerInterface $serializer): Response
+    {
+        $paises = $doctrine->getRepository(Pais::class)->findAll();
+      
+        if (!$paises) {
+            throw $this->createNotFoundException(
+                'No hay datos'
+            );
+        }
+       
+        $jsonContent = $serializer->serialize(array('data'=>$paises), 'json');
+        return new Response($jsonContent);
     }
 }
